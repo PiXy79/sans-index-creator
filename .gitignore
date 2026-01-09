@@ -2,7 +2,6 @@
 __pycache__/
 *.py[codz]
 *$py.class
-*.xlsx
 
 # C extensions
 *.so
@@ -206,3 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Application specific ignores
+*.xlsx
+SANS_index.docx
