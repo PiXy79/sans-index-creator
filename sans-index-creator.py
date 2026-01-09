@@ -76,7 +76,9 @@ section.bottom_margin = Inches(0.5)
 # Add page numbers to footer
 footer = section.footer
 footer_paragraph = footer.paragraphs[0]
-footer_paragraph.text = "Page "
+footer_paragraph.text = ""
+footer_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+footer_paragraph.style.font.size = Pt(6)
 run = footer_paragraph.add_run()
 add_page_number(run)
 
@@ -86,16 +88,22 @@ if not index_entries:
     print("No data found. Generated document with message.")
     exit()
 
-
 # Add main index with letter sections
 for letter in sorted(grouped.keys()):
     heading = doc.add_paragraph(letter)
     heading.style = 'Heading 1'
+    # Adjust heading vertical spacing (controls the visual "height" of the letter heading)
+    heading_format = heading.paragraph_format
+    heading_format.space_before = Pt(6)
+    heading_format.space_after = Pt(4)
+    heading_format.line_spacing = 1.0
     
     table = doc.add_table(rows=1, cols=2)
-    table.width = Inches(2.5)
-    table.columns[0].width = Inches(1.5)
-    table.columns[1].width = Inches(1)
+    # Make the table span more of the page and give more space to the first column
+    table.autofit = False
+    table.width = Inches(7.0)
+    table.columns[0].width = Inches(5.5)
+    table.columns[1].width = Inches(1.5)
         
     # Add entries for this letter
     for label, page_ref in grouped[letter]:
@@ -105,7 +113,7 @@ for letter in sorted(grouped.keys()):
     
     # Set smaller row height
     for row in table.rows:
-        row.height = Pt(15)
+        row.height = Pt(18)
         row.height_rule = WD_ROW_HEIGHT_RULE.EXACTLY
 
 # Save document
