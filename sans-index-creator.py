@@ -6,7 +6,6 @@ from docx.shared import Pt, Inches
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from collections import defaultdict
-import string
 import os
 import sys
 
@@ -54,12 +53,12 @@ for label, page_ref in index_entries:
 doc = Document()
 
 # Set default font size to smaller
-doc.styles['Normal'].font.size = Pt(11)
+doc.styles['Normal'].font.size = Pt(9)
 doc.styles['Normal'].font.name = 'Arial'
 
 # Set heading font to Arial
 doc.styles['Heading 1'].font.name = 'Arial'
-doc.styles['Heading 1'].font.size = Pt(22)
+doc.styles['Heading 1'].font.size = Pt(20)
 
 # Set document to one column
 section = doc.sections[0]
@@ -113,7 +112,7 @@ for letter in sorted(grouped.keys()):
     
     # Set smaller row height
     for row in table.rows:
-        row.height = Pt(18)
+        row.height = Pt(16)
         row.height_rule = WD_ROW_HEIGHT_RULE.EXACTLY
 
 # Save document
