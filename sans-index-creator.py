@@ -8,6 +8,7 @@ from docx.oxml import OxmlElement
 from collections import defaultdict
 import os
 import sys
+from tabulate import tabulate
 
 def add_page_number(run):
     fldChar1 = OxmlElement('w:fldChar')
@@ -48,6 +49,61 @@ for label, page_ref in index_entries:
     first_letter = label[0].upper()
     if first_letter.isalpha():
         grouped[first_letter].append((label, page_ref))
+
+# Print statistics
+print("\n" + "="*50)
+print("📊 INDEX GENERATION STATISTICS")
+print("="*50)
+
+# Total entries statistics
+print(f"\n📈 Total Statistics:")
+total_read = len(index_entries)
+total_produced = sum(len(entries) for entries in grouped.values())
+print(f"   • Entries read from Excel: {total_read}")
+print(f"   • Entries in final index: {total_produced}")
+
+# Page reference statistics
+entries_with_page_ref = sum(1 for _, page_ref in index_entries if page_ref)
+entries_without_page_ref = total_read - entries_with_page_ref
+print(f"\n📄 Page Reference Statistics:")
+print(f"   • With page references: {entries_with_page_ref}")
+print(f"   • Without page references: {entries_without_page_ref}")
+
+# Entries per letter statistics
+print(f"\n📝 Entries per Letter:")
+letter_stats = []
+for letter in sorted(grouped.keys()):
+    count = len(grouped[letter])
+    letter_stats.append([letter, count])
+
+table_data = sorted(letter_stats, key=lambda x: x[0])
+print(tabulate(table_data, headers=["Letter", "Count"], tablefmt="simple"))
+
+# Min/Max per letter
+counts = [count for _, count in letter_stats]
+min_count = min(counts) if counts else 0
+max_count = max(counts) if counts else 0
+min_letter = next(letter for letter, count in letter_stats if count == min_count)
+max_letter = next(letter for letter, count in letter_stats if count == max_count)
+
+# Entry length statistics
+entry_lengths = [len(label) for label, _ in index_entries]
+min_length = min(entry_lengths) if entry_lengths else 0
+max_length = max(entry_lengths) if entry_lengths else 0
+min_entry = next((label for label, _ in index_entries if len(label) == min_length), "")
+max_entry = next((label for label, _ in index_entries if len(label) == max_length), "")
+
+# Summary stats
+total_letters = len(grouped)
+avg_per_letter = total_produced / total_letters if total_letters > 0 else 0
+print(f"\n📊 Summary:")
+print(f"   • Total letters: {total_letters}")
+print(f"   • Average entries per letter: {avg_per_letter:.2f}")
+print(f"   • Most entries: {max_letter} ({max_count})")
+print(f"   • Least entries: {min_letter} ({min_count})")
+print(f"   • Shortest entry: '{min_entry}' ({min_length} chars)")
+print(f"   • Longest entry: '{max_entry}' ({max_length} chars)")
+print("="*50 + "\n")
 
 # Create Word document
 doc = Document()
