@@ -10,6 +10,18 @@ import os
 import sys
 from tabulate import tabulate
 
+# Option: alternate row background
+ALTERNATE_ROW_BG = True
+ALTERNATE_FILL = 'F2F2F2'  # light gray fill (hex, no #)
+import argparse
+
+# Parse command-line options (keep alternate row background ON by default)
+parser = argparse.ArgumentParser(description='Generate SANS index Word document from index.xlsx')
+parser.add_argument('--no-alternate', dest='alternate', action='store_false',
+                    help='Disable alternating row background in the generated document')
+args = parser.parse_args()
+ALTERNATE_ROW_BG = args.alternate
+
 def add_page_number(run):
     fldChar1 = OxmlElement('w:fldChar')
     fldChar1.set(qn('w:fldCharType'), 'begin')
@@ -124,7 +136,8 @@ cols.set(qn('w:num'), '1')
 
 # Set smaller margins
 section.left_margin = Inches(1.0)
-section.right_margin = Inches(0.5)
+# Increase right margin slightly for consistent right-side whitespace
+section.right_margin = Inches(0.75)
 section.top_margin = Inches(0.5)
 section.bottom_margin = Inches(0.5)
 
@@ -156,15 +169,23 @@ for letter in sorted(grouped.keys()):
     table = doc.add_table(rows=1, cols=2)
     # Make the table span more of the page and give more space to the first column
     table.autofit = False
-    table.width = Inches(6.0)
-    table.columns[0].width = Inches(4.0)
+    table.width = Inches(5.8)
+    table.columns[0].width = Inches(3.8)
     table.columns[1].width = Inches(2.0)
         
     # Add entries for this letter
+    first_used = False
     for label, page_ref in grouped[letter]:
-        row_cells = table.add_row().cells
+        # Reuse the initial row for the first entry to avoid a leading empty row
+        if not first_used:
+            row_cells = table.rows[0].cells
+            first_used = True
+        else:
+            row_cells = table.add_row().cells
+
         row_cells[0].text = label
         row_cells[1].text = page_ref
+
         # Set cell margins to prevent text overflow
         for cell in row_cells:
             tc = cell._element
@@ -177,6 +198,18 @@ for letter in sorted(grouped.keys()):
                 margin.set(qn('w:type'), 'dxa')
                 tcMar.append(margin)
             tcPr.append(tcMar)
+
+            # Apply alternating row background shading (optional)
+            if ALTERNATE_ROW_BG:
+                # new row index is last in table.rows
+                row_idx = len(table.rows) - 1
+                # shade odd-indexed rows (so first data row is shaded)
+                if row_idx % 2 == 1:
+                    shd = OxmlElement('w:shd')
+                    shd.set(qn('w:val'), 'clear')
+                    shd.set(qn('w:fill'), ALTERNATE_FILL)
+                    tcPr.append(shd)
+
             # Remove paragraph spacing
             for paragraph in cell.paragraphs:
                 paragraph.paragraph_format.space_before = Pt(0)

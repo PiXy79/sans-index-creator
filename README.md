@@ -42,6 +42,16 @@ pip install openpyxl python-docx tabulate
    python sans-index-creator.py
    ```
 
+You can control alternating row background shading using a command-line flag. By default alternating shading is enabled.
+
+Disable alternating shading:
+
+```bash
+python sans-index-creator.py --no-alternate
+```
+
+The generated file is `SANS_Index.docx`.
+
 3. **Statistics Output**: The script displays comprehensive statistics in the terminal:
    - Total entries read from the Excel file and entries in final index
    - Page reference statistics (entries with/without page references)
