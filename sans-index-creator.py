@@ -156,8 +156,8 @@ for letter in sorted(grouped.keys()):
     table = doc.add_table(rows=1, cols=2)
     # Make the table span more of the page and give more space to the first column
     table.autofit = False
-    table.width = Inches(7.0)
-    table.columns[0].width = Inches(5.0)
+    table.width = Inches(6.0)
+    table.columns[0].width = Inches(4.0)
     table.columns[1].width = Inches(2.0)
         
     # Add entries for this letter
@@ -165,11 +165,28 @@ for letter in sorted(grouped.keys()):
         row_cells = table.add_row().cells
         row_cells[0].text = label
         row_cells[1].text = page_ref
+        # Set cell margins to prevent text overflow
+        for cell in row_cells:
+            tc = cell._element
+            tcPr = tc.get_or_add_tcPr()
+            tcMar = OxmlElement('w:tcMar')
+            margins = {'top': 40, 'left': 100, 'bottom': 40, 'right': 100}
+            for margin_name, margin_value in margins.items():
+                margin = OxmlElement(f'w:{margin_name}')
+                margin.set(qn('w:w'), str(margin_value))
+                margin.set(qn('w:type'), 'dxa')
+                tcMar.append(margin)
+            tcPr.append(tcMar)
+            # Remove paragraph spacing
+            for paragraph in cell.paragraphs:
+                paragraph.paragraph_format.space_before = Pt(0)
+                paragraph.paragraph_format.space_after = Pt(0)
+                paragraph.paragraph_format.line_spacing = 1.1
     
-    # Set smaller row height
+    # Set smaller row height but allow expansion for content
     for row in table.rows:
-        row.height = Pt(16)
-        row.height_rule = WD_ROW_HEIGHT_RULE.EXACTLY
+        row.height = Pt(8)
+        row.height_rule = WD_ROW_HEIGHT_RULE.AT_LEAST
 
 # Save document
 doc.save('SANS_Index.docx')
