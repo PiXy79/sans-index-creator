@@ -123,7 +123,7 @@ cols = sectPr.xpath('./w:cols')[0]
 cols.set(qn('w:num'), '1')
 
 # Set smaller margins
-section.left_margin = Inches(0.5)
+section.left_margin = Inches(1.0)
 section.right_margin = Inches(0.5)
 section.top_margin = Inches(0.5)
 section.bottom_margin = Inches(0.5)
@@ -157,8 +157,8 @@ for letter in sorted(grouped.keys()):
     # Make the table span more of the page and give more space to the first column
     table.autofit = False
     table.width = Inches(7.0)
-    table.columns[0].width = Inches(5.5)
-    table.columns[1].width = Inches(1.5)
+    table.columns[0].width = Inches(5.0)
+    table.columns[1].width = Inches(2.0)
         
     # Add entries for this letter
     for label, page_ref in grouped[letter]:
